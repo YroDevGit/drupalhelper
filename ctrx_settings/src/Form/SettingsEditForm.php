@@ -21,6 +21,13 @@ class SettingsEditForm extends FormBase {
       ->execute()
       ->fetchObject();
 
+
+    $form['actions']['back'] = [
+      '#type' => 'link',
+      '#title' => '← Back to list',
+      '#url' => \Drupal\Core\Url::fromRoute('ctrx_settings.page'),
+    ];
+
     $form['id'] = [
       '#type' => 'hidden',
       '#value' => $record->id,
