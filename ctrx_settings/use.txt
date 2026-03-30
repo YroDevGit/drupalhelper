@@ -1,0 +1,5 @@
+in ctrx_settings
+$gb = \Drupal\ctrx_settings\SettingsStorage::get("gb");
+
+in taxonomy
+$promos = \Ctrx\DrupalHelper::getTaxonomy("promos");
