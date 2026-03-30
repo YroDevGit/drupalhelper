@@ -1,0 +1,14 @@
+{
+    "name": "ctrx/drupal-helper",
+    "description": "Lightweight helper for Drupal media library parsing and media utilities",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+      "psr-4": {
+        "Ctrx\\": "src/"
+      }
+    },
+    "require": {
+      "php": ">=8.0"
+    }
+  }
