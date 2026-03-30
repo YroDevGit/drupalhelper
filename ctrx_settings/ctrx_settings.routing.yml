@@ -1,0 +1,24 @@
+ctrx_settings.page:
+  path: '/admin/ctrx/settings'
+  defaults:
+    _form: '\Drupal\ctrx_settings\Form\SettingsPage'
+    _title: 'CTRX Settings Manager'
+  requirements:
+    _permission: 'administer site configuration'
+
+ctrx_settings.edit:
+  path: '/admin/ctrx/settings/edit/{id}'
+  defaults:
+    _form: '\Drupal\ctrx_settings\Form\SettingsEditForm'
+    _title: 'Edit Setting'
+  requirements:
+    _permission: 'administer site configuration'
+
+ctrx_settings.delete:
+  path: '/admin/ctrx/settings/delete/{id}'
+  defaults:
+    _form: '\Drupal\ctrx_settings\Form\SettingsDeleteForm'
+    _title: 'Delete Setting'
+  requirements:
+    _permission: 'administer site configuration'
+

@@ -1,0 +1,28 @@
+<?php
+
+function ctrx_settings_schema() {
+  return [
+    'ctrx_settings' => [
+      'description' => 'Key value settings table',
+      'fields' => [
+        'id' => [
+          'type' => 'serial',
+          'not null' => TRUE,
+        ],
+        'setting_key' => [
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ],
+        'setting_value' => [
+          'type' => 'text',
+          'not null' => FALSE,
+        ],
+      ],
+      'primary key' => ['id'],
+      'indexes' => [
+        'setting_key' => ['setting_key'],
+      ],
+    ],
+  ];
+}

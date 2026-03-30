@@ -1,0 +1,5 @@
+name: Ctrx Settings
+type: module
+description: Simple global key-value settings
+core_version_requirement: ^10
+package: Ctrx

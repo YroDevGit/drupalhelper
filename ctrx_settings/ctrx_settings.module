@@ -1,0 +1,7 @@
+<?php
+
+use Drupal\Core\Config\ConfigFactoryInterface;
+
+function ctrx_setting($key) {
+  return \Drupal::config('ctrx.settings')->get($key);
+}
