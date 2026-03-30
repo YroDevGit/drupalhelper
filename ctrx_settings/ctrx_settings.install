@@ -18,6 +18,10 @@ function ctrx_settings_schema() {
           'type' => 'text',
           'not null' => FALSE,
         ],
+        'setting_type' => [
+          'type' => 'text',
+          'not null' => FALSE,
+        ]
       ],
       'primary key' => ['id'],
       'indexes' => [

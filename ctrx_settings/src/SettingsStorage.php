@@ -23,7 +23,7 @@ class SettingsStorage {
       ->fetchField() ?? NULL;
   }
 
-  public static function set($key, $value) {
+  public static function set($key, $value, $type) {
     $db = Database::getConnection();
 
     $exists = $db->select('ctrx_settings', 'c')
@@ -34,7 +34,7 @@ class SettingsStorage {
 
     if ($exists) {
       $db->update('ctrx_settings')
-        ->fields(['setting_value' => $value])
+        ->fields(['setting_value' => $value, "setting_type" => $type])
         ->condition('setting_key', $key)
         ->execute();
     }
@@ -43,9 +43,26 @@ class SettingsStorage {
         ->fields([
           'setting_key' => $key,
           'setting_value' => $value,
+          "setting_type" => $type
         ])
         ->execute();
     }
+  }
+
+  public static function getMedia($key, $field = 'field_media_image') {
+
+    $mid = self::get($key);
+    if (!$mid) return NULL;
+
+    $media = Media::load($mid);
+    if (!$media) return NULL;
+
+    if (!$media->hasField($field)) return NULL;
+
+    $file = $media->get($field)->entity;
+    if (!$file) return NULL;
+
+    return file_create_url($file->getFileUri());
   }
 
   public static function delete($key) {
