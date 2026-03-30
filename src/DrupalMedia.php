@@ -4,7 +4,7 @@ namespace Ctrx;
 
 use Drupal\media\Entity\Media;
 
-class Ctrx
+class DrupalMedia
 {
 
     /**
