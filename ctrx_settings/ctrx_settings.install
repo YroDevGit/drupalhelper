@@ -1,5 +1,24 @@
 <?php
 
+use Drupal\shortcut\Entity\Shortcut;
+
+function ctrx_settings_install() {
+  $shortcut = Shortcut::create([
+    'title' => 'CTRX Settings',
+    'link' => ['uri' => 'internal:/admin/ctrx/settings'],
+    'shortcut_set' => 'default',
+  ]);
+  $shortcut->save();
+  $set = \Drupal::entityTypeManager()
+    ->getStorage('shortcut_set')
+    ->load('default');
+
+  if ($set) {
+    $shortcut->shortcut_set->target_id = $set->id();
+    $shortcut->save();
+  }
+}
+
 function ctrx_settings_schema() {
   return [
     'ctrx_settings' => [
