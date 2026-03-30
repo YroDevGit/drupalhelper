@@ -20,7 +20,7 @@ class DrupalForm
           $conf = $class->configuration[$k] ?? null;
         }
         if (isset($v['type']) && $v['type'] == "checkbox") {
-          $label = $class->t($v['label'] ?? ucfirst($k));
+          $label = \Drupal::translation()->translate($v['label'] ?? ucfirst($k));
           $form[$k] = [
             '#type' => "checkbox",
             '#title' => $label,
@@ -29,11 +29,11 @@ class DrupalForm
           continue;
         }
         if (isset($v['type']) && $v['type'] == "select") {
-          $label = $class->t($v['label'] ?? ucfirst($k));
+          $label = \Drupal::translation()->translate($v['label'] ?? ucfirst($k));
           $name = $v['name'] ?? $label;
           $form[$k] = [
             '#type' => "select",
-            '#title' => $class->t($v['label'] ?? ucfirst($k)),
+            '#title' => \Drupal::translation()->translate($v['label'] ?? ucfirst($k)),
             '#options' => $v['options'] ?? ["0" => "Select " . $name],
             '#default_value' => $conf ?? "0",
           ];
@@ -44,8 +44,8 @@ class DrupalForm
             $form[$k] = [
               '#type' => 'media_library',
               '#allowed_bundles' => $v['allowed'] ?? ['image'], // Restrict to image media types
-              '#title' => $class->t($v['label'] ?? $k),
-              '#description' => $class->t('Upload a new image or choose an existing one from the library.'),
+              '#title' => \Drupal::translation()->translate($v['label'] ?? $k),
+              '#description' => \Drupal::translation()->translate('Upload a new image or choose an existing one from the library.'),
               '#cardinality' => 1,
             ];
             $conf = $conf ?? [];
@@ -61,7 +61,7 @@ class DrupalForm
           }
           $form[$k] = [
             '#type' => 'managed_file',
-            '#title' => $class->t($v['label'] ?? $k),
+            '#title' => \Drupal::translation()->translate($v['label'] ?? $k),
             '#upload_location' => 'public://hero_banner/',
             '#default_value' => $conf ?? [],
           ];
@@ -75,7 +75,7 @@ class DrupalForm
         if (isset($v['type']) && $v['type'] == "submit") {
           $form[$k] = [
             '#type' => 'submit',
-            '#value' => $class->t($v['label'] ?? "Submit"),
+            '#value' => \Drupal::translation()->translate($v['label'] ?? "Submit"),
           ];
   
           if (isset($v['id'])) {
@@ -126,7 +126,7 @@ class DrupalForm
           }
           $form[$k] = [
             '#type' => 'fieldset',
-            '#title' => $class->t($v['label'] ?? ucfirst($k)),
+            '#title' => \Drupal::translation()->translate($v['label'] ?? ucfirst($k)),
             '#tree' => TRUE,
             '#prefix' => "<div id='$wrap'>",
             '#suffix' => '</div>',
@@ -190,7 +190,7 @@ class DrupalForm
   
         $form[$k] = [
           '#type' => $v['type'] ?? "textfield",
-          '#title' => $class->t($v['label'] ?? ucfirst($k)),
+          '#title' => \Drupal::translation()->translate($v['label'] ?? ucfirst($k)),
           '#default_value' => $value,
         ];
       }
