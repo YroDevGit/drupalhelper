@@ -9,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 class DrupalForm
 {
 
-    public static function filterBlockFormCtr($data, FormStateInterface $form_state, string|int $parent = null, $counter = -1, $class = null)
+    public static function filterBlockFormCtr($data, FormStateInterface $form_state, string|int $parent = null, $counter = -1, $config = [])
     {
       $form = [];
       foreach ($data as $k => $v) {
@@ -17,7 +17,7 @@ class DrupalForm
         if ($parent) {
           //$conf = $this->configuration[$parent] ?? null;
         } else {
-          $conf = $class->configuration[$k] ?? null;
+          $conf = $config[$k] ?? null;
         }
         if (isset($v['type']) && $v['type'] == "checkbox") {
           $label = \Drupal::translation()->translate($v['label'] ?? ucfirst($k));
@@ -77,11 +77,11 @@ class DrupalForm
             '#type' => 'submit',
             '#value' => \Drupal::translation()->translate($v['label'] ?? "Submit"),
           ];
-  
+
           if (isset($v['id'])) {
             $form[$k]["#" . $v['id']] = $counter;
           }
-  
+
           if (isset($v['ajax'])) {
             if (is_string($v['ajax']['callback'])) {
               $form[$k]["#ajax"]['callback'] = [get_class($class), $v['ajax']['callback']];
@@ -90,7 +90,7 @@ class DrupalForm
               $form[$k]["#ajax"] = $v['ajax'];
             }
           }
-  
+
           if (isset($v['action']) || isset($v['callback'])) {
             $form[$k]['#submit'] = [
               [get_class($class), $v['action'] ?? $v['callback']]
@@ -98,28 +98,28 @@ class DrupalForm
           }
           continue;
         }
-  
+
         if (isset($v['type']) && $v['type'] == "fieldset") {
           $items = $v['items'] ?? [];
-  
+
           $triggerBtn = true;
           $akinIto = $form_state->get($k);
-  
-          $form_state->set($k, $form_state->get($k) ?? $class->configuration[$k] ?? []);
-  
+
+          $form_state->set($k, $form_state->get($k) ?? $config[$k] ?? []);
+
           if ($akinIto === NULL) {
             $triggerBtn = false;
             $akinIto = $form_state->get($k);
           }
           $akinIto = array_values($akinIto);
-  
+
           $num_items = 0;
           if ($form_state->get($k)) {
             $num_items = count($akinIto);
           } else {
             $num_items = count($akinIto);
           }
-  
+
           $wrap = $k . "-" . "wrapper";
           if (isset($v['wrapper'])) {
             $wrap =  $v['wrapper'];
@@ -131,9 +131,9 @@ class DrupalForm
             '#prefix' => "<div id='$wrap'>",
             '#suffix' => '</div>',
           ];
-  
-          $children = self::filterBlockFormCtr($items, $form_state, $k, -1, $class);
-  
+
+          $children = self::filterBlockFormCtr($items, $form_state, $k, -1, $config);
+
           for ($i = 0; $i < $num_items; $i++) {
             $atinIto = $akinIto[$i] ?? [];
             foreach ($children as $ikey => $child) {
@@ -143,7 +143,7 @@ class DrupalForm
               $form[$k][$i]['divider'] = [
                 '#markup' => '<hr style="margin:10px 0;">',
               ];
-  
+
               if (isset($child['#type']) && $child['#type'] == 'submit') {
                 $child['#limit_validation_errors'] = [];
                 $child['#attributes']['data-index'] = $i;
@@ -168,9 +168,9 @@ class DrupalForm
           }
           continue;
         }
-  
+
         $value = "";
-        $vl = $class->configuration[$k] ?? "";
+        $vl = $config[$k] ?? "";
         if (isset($v['trim'])) {
           $trm = $v['trim'];
           if (is_bool($trm)) {
@@ -187,7 +187,7 @@ class DrupalForm
         } else {
           $value = trim($vl);
         }
-  
+
         $form[$k] = [
           '#type' => $v['type'] ?? "textfield",
           '#title' => \Drupal::translation()->translate($v['label'] ?? ucfirst($k)),
