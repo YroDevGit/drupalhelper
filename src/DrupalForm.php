@@ -9,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 class DrupalForm
 {
 
-    public static function filterBlockFormCtr($data, FormStateInterface $form_state, string|int $parent = null, $counter = -1, $config = [])
+    public static function filterBlockFormCtr($data, FormStateInterface $form_state, string|int $parent = null, $counter = -1, $config = [], $class = null)
     {
       $form = [];
       foreach ($data as $k => $v) {
@@ -132,7 +132,7 @@ class DrupalForm
             '#suffix' => '</div>',
           ];
 
-          $children = self::filterBlockFormCtr($items, $form_state, $k, -1, $config);
+          $children = self::filterBlockFormCtr($items, $form_state, $k, -1, $config, $class);
 
           for ($i = 0; $i < $num_items; $i++) {
             $atinIto = $akinIto[$i] ?? [];
