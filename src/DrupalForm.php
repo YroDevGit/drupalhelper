@@ -3,11 +3,13 @@
 namespace Ctrx;
 
 use Drupal\media\Entity\Media;
+use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Form\FormStateInterface;
 
 class DrupalForm
 {
 
-    public function filterBlockFormCtr($data, FormStateInterface $form_state, string|int $parent = null, $counter = -1, $class = null)
+    public static function filterBlockFormCtr($data, FormStateInterface $form_state, string|int $parent = null, $counter = -1, $class = null)
     {
       $form = [];
       foreach ($data as $k => $v) {
