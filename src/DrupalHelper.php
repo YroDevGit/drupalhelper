@@ -50,4 +50,42 @@ class DrupalHelper
 
         return null;
     }
+
+
+    public static function blockSubmiteFilterCTR($data, $except, $form, $form_state, &$conf = [])
+  {
+    foreach ($data as $k => $v) {
+      if (in_array($v, $except)) continue;
+      if (isset($v['type'])) {
+        if ($v['type'] == "submit") continue;
+        if ($v['type'] == "markup" || $v['type'] == "html") continue;
+        if ($v['type'] == "fieldset") {
+          $items = $v['items'];
+          if (! empty($items)) {
+            foreach ($items as $ko => $lo) {
+              self::blockSubmiteFilterCTR($lo, [], $form, $form_state, $conf[$k]);
+            }
+          }
+        }
+        $val = $form_state->getValue($k) ?? NULL;
+        if($v['type'] == "file"){
+          if(isset($v['picker']) && $v['picker'] == "media"){
+            \Ctrx\DrupalMedia::getMediaDetail($val, $conf[$k]);
+            continue;
+          }
+        }
+        if($v['type'] == "auto" || $v['type'] == "auto_complete"){
+          $node = \Drupal\node\Entity\Node::load($val);
+          if($node){
+            $url = $node->toUrl()->toString();
+            $val = [
+              "page_id" => $val,
+              "url" => $url
+            ];
+          }
+        }
+        $conf[$k] = $val;
+      }
+    }
+  }
 }

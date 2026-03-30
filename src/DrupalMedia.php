@@ -12,7 +12,7 @@ class DrupalMedia
      */
 
 
-    public static function getMediaDetail($item)
+    public static function getMediaDetail($item, &$confWithKey = [])
     {
         if (is_string($item) && $item) {
             $exp = explode(",", $item);
@@ -22,14 +22,16 @@ class DrupalMedia
             $fl = $file->get('field_media_image')->entity;
 
             if ($file && $fl) {
-                return [
+                $confWithKey = [
                     'image_fid' => $file->id(),
                     'image_url' => \Drupal::service('file_url_generator')
                         ->generateAbsoluteString($fl->getFileUri()),
                 ];
+
+
             }
         } else {
-            return [];
+            $confWithKey = [];
         }
     }
 
@@ -39,7 +41,7 @@ class DrupalMedia
             if (! empty($item)) {
                 $file = \Drupal\file\Entity\File::load($item[0]);
                 if ($file) {
-                    $file->setPermanent(); 
+                    $file->setPermanent();
                     $file->save();
                     return [
                         'image_fid' => $file->id(),
