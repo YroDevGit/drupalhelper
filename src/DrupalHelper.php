@@ -2,6 +2,9 @@
 
 namespace Ctrx;
 
+use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Form\FormStateInterface;
+
 class DrupalHelper
 {
     public static function getTaxonomy(
@@ -87,5 +90,95 @@ class DrupalHelper
         $conf[$k] = $val;
       }
     }
+  }
+
+  /**
+   * $key should be type: fieldset
+   */
+  public static function addOne(string $key, array $values, FormStateInterface &$form_state){
+    $itemKey = $key;
+    $current = $form_state->get($itemKey);
+    if(self::arrayHasKeys($values)){
+      $current[] = $values;
+    }else{
+      $pw = [];
+      foreach($values as $k=>$v){
+        $pw[$v] = "-";
+      }
+      $current[] = $pw;
+    }
+
+    $form_state->set($itemKey, $current);
+    $newInput = $form_state->getUserInput();
+    $form_state->setUserInput($newInput);
+
+    $form_state->setRebuild(TRUE);
+  }
+
+  public static function clearItems(string $key, FormStateInterface &$form_state){
+    $form_state->set($key, []);
+    $newInput = $form_state->getUserInput();
+    $form_state->setUserInput($newInput);
+
+    $form_state->setRebuild(TRUE);
+  }
+
+
+  /**
+   * $key should be type: fieldset
+   */
+  public static function removeOne(string $key, FormStateInterface &$form_state){
+     $itemKey = $key;
+    $trigger = $form_state->getTriggeringElement();
+    $index = $trigger["#index"] ?? 0;
+    $items = $form_state->get($itemKey) ?? [];
+    unset($items[$index]);
+    $newItems = array_values($items);
+
+    $form_state->set($itemKey, $newItems);
+    $newInput = $form_state->getUserInput();
+    unset($newInput['settings'][$itemKey][$index]);
+    $newData = array_values($newInput['settings'][$itemKey] ?? []);
+    $newInput['settings'][$itemKey] = $newData;
+    $form_state->setUserInput($newInput);
+    $form_state->setRebuild(TRUE);
+  }
+
+  public static function ajaxCallback(string $key, FormStateInterface &$form_state){
+    $itemKey = $key;
+    $complete_form = $form_state->getCompleteForm();
+
+    if (isset($complete_form[$itemKey])) {
+      return $complete_form[$itemKey];
+    }
+
+    if (isset($complete_form['settings'][$itemKey])) {
+      return $complete_form['settings'][$itemKey];
+    }
+    return $complete_form;
+  }
+
+  public static function defaultConfig(array $data){
+    $ret = [];
+    foreach ($data as $k => $v) {
+      if (isset($v['type'])) {
+        $type = $v['type'];
+        if ($type == "fieldset") {
+          $ret[$k] = [];
+        } else if ($type == "file" || $type == "file_managed") {
+          $ret[$k] = [];
+        } else if ($type == "submit") {
+          continue;
+        } else {
+          $ret[$k] = $v['default'] ?? "";
+        }
+      }
+    }
+    return $ret;
+  }
+
+  private static function arrayHasKeys(array $data):bool{
+    $isAssoc = array_keys($data) !== range(0, count($data) - 1);
+    return $isAssoc;
   }
 }

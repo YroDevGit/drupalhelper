@@ -111,7 +111,7 @@ class DrupalForm
           if (isset($v['ajax'])) {
             if (is_string($v['ajax']['callback'])) {
               $form[$k]["#ajax"]['callback'] = [get_class($class), $v['ajax']['callback']];
-              $form[$k]["#ajax"]['wrapper'] = $v['ajax']['wrapper'];
+              $form[$k]["#ajax"]['wrapper'] = $v['ajax']['wrapper']."_wrapper";
             } else {
               $form[$k]["#ajax"] = $v['ajax'];
             }
@@ -146,7 +146,7 @@ class DrupalForm
             $num_items = count($akinIto);
           }
 
-          $wrap = $k . "-" . "wrapper";
+          $wrap = $k . "_" . "wrapper";
           if (isset($v['wrapper'])) {
             $wrap =  $v['wrapper'];
           }
