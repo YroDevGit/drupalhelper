@@ -50,22 +50,35 @@ class DrupalHelper
     if ($field === 'description') {
       return $item->getDescription();
     }
-    $fieldItem = $item->get($field);
-    if ($fieldItem->getFieldDefinition()->getType() === 'link') {
-      $link = $fieldItem->first();
 
-      return $link ? [
-        'uri' => $link->getUrl()->toString(),
-        'title' => $link->title ?? null,
-        'options' => $link->options ?? []
-      ] : null;
+    if (!$item->hasField($field) || $item->get($field)->isEmpty()) {
+      return null;
     }
 
-    if ($item->hasField($field) && !$item->get($field)->isEmpty()) {
-      return $item->get($field)->value;
+    $fieldItems = $item->get($field);
+    $type = $fieldItems->getFieldDefinition()->getType();
+
+    $values = [];
+
+    foreach ($fieldItems as $delta => $fieldItem) {
+
+      if ($type === 'link') {
+        $values[] = [
+          'uri' => $fieldItem->getUrl()->toString(),
+          'title' => $fieldItem->title ?? null,
+          'options' => $fieldItem->options ?? [],
+        ];
+        continue;
+      }
+
+      if (isset($fieldItem->value)) {
+        $values[] = $fieldItem->value;
+        continue;
+      }
+      $values[] = $fieldItem->getValue();
     }
 
-    return null;
+    return count($values) === 1 ? $values[0] : $values;
   }
 
   public static function blockSubmiteFilterCTR($data, $except, $form, $form_state, &$conf = [])
