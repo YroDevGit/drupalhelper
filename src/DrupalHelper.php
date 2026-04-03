@@ -7,55 +7,61 @@ use Drupal\Core\Form\FormStateInterface;
 
 class DrupalHelper
 {
-    public static function getTaxonomy(
-        string $vocabulary,
-        array $includes = ['id', 'name']
-    ): array {
+  public static function getTaxonomy(
+    string $vocabulary,
+    array $includes = ['id', 'name']
+  ): array {
 
-        $items = \Drupal::entityTypeManager()
-            ->getStorage('taxonomy_term')
-            ->loadTree($vocabulary);
+    $tree = \Drupal::entityTypeManager()
+      ->getStorage('taxonomy_term')
+      ->loadTree($vocabulary);
 
-        $result = [];
+    // Collect IDs
+    $tids = array_column($tree, 'tid');
 
-        foreach ($items as $item) {
+    // Load full entities
+    $terms = \Drupal::entityTypeManager()
+      ->getStorage('taxonomy_term')
+      ->loadMultiple($tids);
 
-            $row = [];
+    $result = [];
 
-            foreach ($includes as $field) {
-                $row[$field] = self::resolve($item, $field);
-            }
+    foreach ($terms as $term) {
 
-            $result[] = $row;
-        }
+      $row = [];
 
-        return $result;
+      foreach ($includes as $field) {
+        $row[$field] = self::resolve($term, $field);
+      }
+
+      $result[] = $row;
+    }
+    return $result;
+  }
+
+  private static function resolve($item, string $field)
+  {
+    if ($field === 'id') {
+      return $item->id();
     }
 
-    private static function resolve($item, string $field)
-    {
-        if ($field === 'id') {
-            return $item->tid ?? null;
-        }
-
-        if ($field === 'name') {
-            return $item->name ?? null;
-        }
-
-        if ($field === 'description' && method_exists($item, 'getDescription')) {
-            $desc = $item->getDescription();
-            return is_object($desc) ? ($desc->value ?? null) : $desc;
-        }
-
-        if (isset($item->{$field})) {
-            return $item->{$field};
-        }
-
-        return null;
+    if ($field === 'name') {
+      return $item->getName();
     }
 
+    if ($field === 'description') {
+      return $item->getDescription();
+    }
 
-    public static function blockSubmiteFilterCTR($data, $except, $form, $form_state, &$conf = [])
+    // ✅ Handle custom fields properly
+    if ($item->hasField($field) && !$item->get($field)->isEmpty()) {
+      return $item->get($field)->value;
+    }
+
+    return null;
+  }
+
+  public static function blockSubmiteFilterCTR($data, $except, $form, $form_state, &$conf = [])
   {
     foreach ($data as $k => $v) {
       if (in_array($v, $except)) continue;
@@ -71,15 +77,15 @@ class DrupalHelper
           }
         }
         $val = $form_state->getValue($k) ?? NULL;
-        if($v['type'] == "file"){
-          if(isset($v['picker']) && $v['picker'] == "media"){
+        if ($v['type'] == "file") {
+          if (isset($v['picker']) && $v['picker'] == "media") {
             \Ctrx\DrupalMedia::getMediaDetail($val, $conf[$k]);
             continue;
           }
         }
-        if($v['type'] == "auto" || $v['type'] == "auto_complete"){
+        if ($v['type'] == "auto" || $v['type'] == "auto_complete") {
           $node = \Drupal\node\Entity\Node::load($val);
-          if($node){
+          if ($node) {
             $url = $node->toUrl()->toString();
             $val = [
               "page_id" => $val,
@@ -95,14 +101,15 @@ class DrupalHelper
   /**
    * $key should be type: fieldset
    */
-  public static function addOne(string $key, array $values, FormStateInterface &$form_state){
+  public static function addOne(string $key, array $values, FormStateInterface &$form_state)
+  {
     $itemKey = $key;
     $current = $form_state->get($itemKey);
-    if(self::arrayHasKeys($values)){
+    if (self::arrayHasKeys($values)) {
       $current[] = $values;
-    }else{
+    } else {
       $pw = [];
-      foreach($values as $k=>$v){
+      foreach ($values as $k => $v) {
         $pw[$v] = "-";
       }
       $current[] = $pw;
@@ -115,7 +122,8 @@ class DrupalHelper
     $form_state->setRebuild(TRUE);
   }
 
-  public static function clearItems(string $key, FormStateInterface &$form_state){
+  public static function clearItems(string $key, FormStateInterface &$form_state)
+  {
     $form_state->set($key, []);
     $newInput = $form_state->getUserInput();
     $form_state->setUserInput($newInput);
@@ -127,8 +135,9 @@ class DrupalHelper
   /**
    * $key should be type: fieldset
    */
-  public static function removeOne(string $key, FormStateInterface &$form_state){
-     $itemKey = $key;
+  public static function removeOne(string $key, FormStateInterface &$form_state)
+  {
+    $itemKey = $key;
     $trigger = $form_state->getTriggeringElement();
     $index = $trigger["#index"] ?? 0;
     $items = $form_state->get($itemKey) ?? [];
@@ -144,7 +153,8 @@ class DrupalHelper
     $form_state->setRebuild(TRUE);
   }
 
-  public static function ajaxCallback(string $key, FormStateInterface &$form_state){
+  public static function ajaxCallback(string $key, FormStateInterface &$form_state)
+  {
     $itemKey = $key;
     $complete_form = $form_state->getCompleteForm();
 
@@ -158,7 +168,8 @@ class DrupalHelper
     return $complete_form;
   }
 
-  public static function defaultConfig(array $data){
+  public static function defaultConfig(array $data)
+  {
     $ret = [];
     foreach ($data as $k => $v) {
       if (isset($v['type'])) {
@@ -177,7 +188,8 @@ class DrupalHelper
     return $ret;
   }
 
-  private static function arrayHasKeys(array $data):bool{
+  private static function arrayHasKeys(array $data): bool
+  {
     $isAssoc = array_keys($data) !== range(0, count($data) - 1);
     return $isAssoc;
   }
