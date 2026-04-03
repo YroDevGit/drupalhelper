@@ -16,10 +16,8 @@ class DrupalHelper
       ->getStorage('taxonomy_term')
       ->loadTree($vocabulary);
 
-    // Collect IDs
     $tids = array_column($tree, 'tid');
 
-    // Load full entities
     $terms = \Drupal::entityTypeManager()
       ->getStorage('taxonomy_term')
       ->loadMultiple($tids);
@@ -52,8 +50,17 @@ class DrupalHelper
     if ($field === 'description') {
       return $item->getDescription();
     }
+    $fieldItem = $item->get($field);
+    if ($fieldItem->getFieldDefinition()->getType() === 'link') {
+      $link = $fieldItem->first();
 
-    // ✅ Handle custom fields properly
+      return $link ? [
+        'uri' => $link->getUrl()->toString(),
+        'title' => $link->title ?? null,
+        'options' => $link->options ?? []
+      ] : null;
+    }
+
     if ($item->hasField($field) && !$item->get($field)->isEmpty()) {
       return $item->get($field)->value;
     }
